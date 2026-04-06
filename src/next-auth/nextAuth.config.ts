@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 export const nextAuthConfig: NextAuthOptions = {
 
   secret: process.env.NEXTAUTH_SECRET, 
+  debug: true,
   
   providers: [
     Credentials({
