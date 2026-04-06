@@ -7,6 +7,7 @@ export const nextAuthConfig: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET, 
   debug: true,
   
+  
   providers: [
     Credentials({
       name: "ElleStore",
