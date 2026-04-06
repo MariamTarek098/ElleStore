@@ -49,24 +49,21 @@ export const nextAuthConfig: NextAuthOptions = {
   ],
   
   callbacks: {
-    jwt: function (param) {
-      if (param.user) {
-        param.token.routetoken = param.user.tokenCredentials;
-        param.token.id = param.user.id;
-      }
+jwt: function (param) {
+  if (param.user) {
+    param.token.routetoken = param.user?.tokenCredentials;
+    param.token.id = param.user.id;
+  }
 
-      return param.token;
-    },
-    session:function(param){
+  return param.token;
+},
+session: function (param) {
+  if (param.session.user) {
+    param.session.user.id = param.token.id as string;
+  }
 
-            param.session.user.id=param.token.id
-            console.log("sessssss", param)
-        return param.session
-
-
- 
-
-    }
+  return param.session;
+}
   },
   jwt: {
     maxAge: 60 * 60 * 3,
