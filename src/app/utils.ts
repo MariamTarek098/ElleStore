@@ -1,17 +1,21 @@
-import { decode } from 'next-auth/jwt';
-import { cookies } from 'next/headers';
+"use server";
 
+import { decode } from "next-auth/jwt";
+import { cookies } from "next/headers";
 
+export async function decodeToken() {
+  const cookieStore = await cookies();
 
-export async function decodeToken():Promise<string  | null>{
-    const cookie = await cookies()
-    const nextAuthToken = cookie.get("next-auth.session-token")?.value
+  const token =
+    cookieStore.get("__Secure-next-auth.session-token")?.value ||
+    cookieStore.get("next-auth.session-token")?.value;
 
-    const jwt = await decode({secret: process.env.NEXTAUTH_SECRET! , token: nextAuthToken})
- if (jwt){
+  if (!token) return null;
 
-     return jwt.routetoken as string
- }else{
-    return null
- }
+  const decodedToken = await decode({
+    token,
+    secret: process.env.NEXTAUTH_SECRET as string,
+  });
+
+  return decodedToken?.routetoken;
 }
