@@ -13,7 +13,7 @@ console.log("from proxy", token)
         return NextResponse.next();
 
     }
-    return NextResponse.redirect(`http://localhost:3000/login`)
+   return NextResponse.redirect(new URL("/login", process.env.NEXTAUTH_URL));
 
 
 }
