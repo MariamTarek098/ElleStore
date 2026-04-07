@@ -9,23 +9,23 @@ export default function QuantityControls({ itemId, count, isIncrement }: { itemI
     const { updateNumberOfCart } = (useCart() as CartContextType);
     const [loading, setLoading] = useState(false);
   
-  async function handleUpdate() {
-    setLoading(true);
-    const data = await updateProduct(itemId ,  count)
-    console.log("datanumOfCartItems",data)
-     toast.loading("updating item ...");
+async function handleUpdate() {
+  setLoading(true);
 
-    if (data?.status === "success") {
-      updateNumberOfCart(data.numOfCartItems);
+  const toastId = toast.loading("updating item ..."); 
 
-      toast.success(data.message);
-     
-    } else {
-      toast.error(data?.message || "Error");
-    }
-    
-    setLoading(false);
+  const data = await updateProduct(itemId, count);
+
+  if (data?.status === "success") {
+    updateNumberOfCart(data.numOfCartItems);
+
+    toast.success(data.message, { id: toastId }); 
+  } else {
+    toast.error(data?.message || "Error", { id: toastId });
   }
+
+  setLoading(false);
+}
 
   return (
     <button 

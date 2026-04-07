@@ -4,6 +4,7 @@ import { Plus, Loader2 } from "lucide-react";
 import { addProuductToCart } from "@/app/cart/cart.action";
 import toast from "react-hot-toast";
 import { CartContextType, useCart } from "@/app/_context/cartContext";
+import { useRouter } from "next/navigation";
 
 interface AddToCartButtonProps {
   id: string;
@@ -12,22 +13,35 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({ id }: AddToCartButtonProps) {
   
   const { updateNumberOfCart } = (useCart() as CartContextType);
-
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter(); 
 
   async function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
- 
     setIsLoading(true);
 
     try {
-      const data = await addProuductToCart(id);
+      const response = await addProuductToCart(id);
 
-      updateNumberOfCart(data.numOfCartItems);
-      toast.success(data.message);
+      if (response?.success) {
+        updateNumberOfCart(response.data.numOfCartItems);
+        toast.success(response.data.message || "Added to cart successfully!");
+      } 
+      // User is not logged in
+      else {
+        toast.error(response?.message || "Failed to add to cart.");
+        
+
+        if (response?.message?.includes("login")) {
+          setTimeout(() => {
+            router.push("/login");
+          }, 1000); 
+        }
+      }
       
     } catch (err: any) {
-      toast.error(err.message || "Failed to add to cart");
+    
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }

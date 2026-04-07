@@ -88,7 +88,7 @@ export default async function Cart() {
                       </p>
                     </div>
                     <div className="flex items-center justify-between mt-4">
-                      {/* Unified Quantity Selector */}
+                      {/*  Quantity Selector */}
                       <div className="flex items-center border border-slate-200 rounded-lg bg-white overflow-hidden divide-x divide-slate-200">
                         <QuantityControls
                           itemId={item.product.id}

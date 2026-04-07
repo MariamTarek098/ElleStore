@@ -4,12 +4,13 @@ import { Loader2, Heart } from "lucide-react";
 import toast from "react-hot-toast";
 import { useWishlist } from "@/app/_context/cartContext";
 import { addProuductToWishlist, removeProductFromWishlist } from "@/app/wishlist/whishlist.action";
+import { useRouter } from "next/navigation"; 
 
 export default function AddToWishlistButton({ id }: { id: string }) {
   const { wishlistIds, setWishlistIds, updateNumberOfWishlist } = useWishlist();
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter(); 
 
-  // Check if current id exists in the global array
   const isFavourite = wishlistIds.includes(id);
 
   async function handleToggle(e: React.MouseEvent) {
@@ -17,27 +18,37 @@ export default function AddToWishlistButton({ id }: { id: string }) {
     setIsLoading(true);
 
     try {
+
+      let response;
+
       if (isFavourite) {
-        //  REMOVE
-        const res = await removeProductFromWishlist({ itemId: id });
-        if (res.status === "success") {
-          toast.success("Removed from wishlist");
-          // Update global ids 
-          setWishlistIds(res.data); 
-          updateNumberOfWishlist(res.data.length);
-        }
+        // REMOVE
+        response = await removeProductFromWishlist({ itemId: id });
       } else {
-        //  ADD
-        const res = await addProuductToWishlist(id);
-        if (res.status === "success") {
-          toast.success(res.message);
-          // Update global ids 
-          setWishlistIds(res.data); 
-          updateNumberOfWishlist(res.data.length);
+        // ADD
+        response = await addProuductToWishlist(id);
+      }
+
+      if (response?.success) {
+        const updatedWishlistArray = response.data.data; 
+        
+        toast.success(response.data.message || (isFavourite ? "Removed from wishlist" : "Added to wishlist"));
+
+        setWishlistIds(updatedWishlistArray); 
+        updateNumberOfWishlist(updatedWishlistArray.length);
+      } 
+
+      else {
+        toast.error(response?.message || "Failed to update wishlist");
+
+        if (response?.message?.includes("log in")) {
+          setTimeout(() => {
+            router.push("/login");
+          }, 1000);
         }
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to update wishlist");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }

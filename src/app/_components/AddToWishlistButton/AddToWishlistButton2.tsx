@@ -4,45 +4,57 @@ import { Loader2, Heart } from "lucide-react";
 import toast from "react-hot-toast";
 import { useWishlist } from "@/app/_context/cartContext";
 import { addProuductToWishlist, removeProductFromWishlist } from "@/app/wishlist/whishlist.action";
+import { useRouter } from "next/navigation"; 
 
 interface AddToWishlistButtonProps {
   id: string;
 }
 
 export default function AddToWishlistButton2({ id }: AddToWishlistButtonProps) {
-  //  from Context
+
   const { wishlistIds, setWishlistIds, updateNumberOfWishlist } = useWishlist();
   
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter(); 
 
-  // Check if current id is in the global array
   const isFavourite = wishlistIds.includes(id);
 
-  async function handleClick() {
+  async function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
     setIsLoading(true);
 
     try {
+      let response;
+
       if (isFavourite) {
-        //  REMOVE
-        const res = await removeProductFromWishlist({ itemId: id });
-        if (res.status === "success") {
-          toast.success("Removed from wishlist");
-          // Update global id 
-          setWishlistIds(res.data); 
-          updateNumberOfWishlist(res.data.length);
-        }
+        // REMOVE
+        response = await removeProductFromWishlist({ itemId: id });
       } else {
         // ADD
-        const res = await addProuductToWishlist(id);
-        if (res.status === "success") {
-          toast.success(res.message || "Added to wishlist");
-          // Update global id 
-          setWishlistIds(res.data); 
-          updateNumberOfWishlist(res.data.length);
+        response = await addProuductToWishlist(id);
+      }
+
+      if (response?.success) {
+        // Extract the actual array of IDs from  API response 
+        const updatedWishlistArray = response.data.data; 
+        
+        toast.success(response.data.message || (isFavourite ? "Removed from wishlist" : "Added to wishlist"));
+        
+        // Update global context 
+        setWishlistIds(updatedWishlistArray); 
+        updateNumberOfWishlist(updatedWishlistArray.length);
+      } 
+      else {
+        toast.error(response?.message || "Failed to update wishlist");
+        
+        if (response?.message?.includes("login")) {
+          setTimeout(() => {
+            router.push("/login");
+          }, 1000);
         }
       }
     } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }

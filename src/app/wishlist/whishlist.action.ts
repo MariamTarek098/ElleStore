@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 
 export async function addProuductToWishlist(id: string) {
   const userToken = await decodeToken();
-  if (!userToken) throw new Error("Please Login Again");
+  
+  if (!userToken) {
+    return { success: false, message: "Please log in first to use the wishlist." };
+  }
 
   const res = await fetch("https://ecommerce.routemisr.com/api/v1/wishlist", {
     method: "POST",
@@ -16,15 +19,22 @@ export async function addProuductToWishlist(id: string) {
   });
 
   const finalRes = await res.json();
-  if (!res.ok) throw new Error(finalRes.message || "Failed to add");
+  
+  if (!res.ok) {
+    return { success: false, message: finalRes.message || "Failed to add to wishlist" };
+  }
   
   revalidatePath("/wishlist");
-  return finalRes; 
+
+  return { success: true, data: finalRes }; 
 }
 
 export async function removeProductFromWishlist({ itemId }: { itemId: string }) {
   const userToken = await decodeToken();
-  if (!userToken) throw new Error("Session Error");
+  
+  if (!userToken) {
+    return { success: false, message: "Please log in to manage your wishlist." };
+  }
 
   const res = await fetch(`https://ecommerce.routemisr.com/api/v1/wishlist/${itemId}`, {
     method: "DELETE",
@@ -32,8 +42,12 @@ export async function removeProductFromWishlist({ itemId }: { itemId: string }) 
   });
 
   const finalRes = await res.json();
-  if (!res.ok) throw new Error("Failed to remove");
+  
+  if (!res.ok) {
+    return { success: false, message: finalRes.message || "Failed to remove item" };
+  }
   
   revalidatePath("/wishlist");
-  return finalRes; 
+ 
+  return { success: true, data: finalRes }; 
 }

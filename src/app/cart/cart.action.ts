@@ -5,8 +5,9 @@ import { decodeToken } from "../utils";
 export async function addProuductToCart(id: string) {
   const userToken = await decodeToken();
 
+  
   if (!userToken) {
-    throw new Error("Session Ended. Please Login Again");
+    return { success: false, message: "Please Login First to add items." };
   }
 
   const res = await fetch("https://ecommerce.routemisr.com/api/v2/cart", {
@@ -21,39 +22,43 @@ export async function addProuductToCart(id: string) {
   const finalRes = await res.json();
 
   if (!res.ok) {
-    throw new Error(finalRes.message || "Failed to add product");
+    return { success: false, message: finalRes.message || "Failed to add product" };
   }
 
-  return finalRes;
+  return { success: true, data: finalRes };
 }
 
 
-export async function RemoveProduct({itemId}: {itemId: string}) {
+export async function RemoveProduct({ itemId }: { itemId: string }) {
   const userToken = await decodeToken();
-  if (userToken) {
-    try {
-      const res = await fetch(
-        `https://ecommerce.routemisr.com/api/v2/cart/${itemId}`,
-        {
-          method: "DELETE",
-          headers: { token: userToken },
-        },
-      );
-      if (res.ok) {
-        const finalRes = await res.json();
-         revalidatePath("/cart")
-        //  console.log("from dele",finalRes);
 
-         return finalRes;
-      }else{
-         return null
+  if (!userToken) {
+    return { success: false, message: "Please log in to manage your cart." };
+  }
 
+  try {
+    const res = await fetch(
+      `https://ecommerce.routemisr.com/api/v2/cart/${itemId}`,
+      {
+        method: "DELETE",
+        headers: { token: userToken },
       }
-    } catch (error) {
-      console.log(error);
+    );
+
+    const finalRes = await res.json();
+
+    if (!res.ok) {
+      return { success: false, message: finalRes.message || "Failed to remove item." };
     }
-  } else {
-    return new Error("Session Error");
+
+    revalidatePath("/cart");
+
+    return { success: true, data: finalRes };
+    
+  } catch (error) {
+
+    console.error("Remove Product Error:", error);
+    return { success: false, message: "A network error occurred. Please try again." };
   }
 }
 

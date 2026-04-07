@@ -42,32 +42,19 @@ export default function LoginPage() {
     },
   });
 
-async function onSubmit(data: LoginObjectType) {
-  
+  async function onSubmit(data: LoginObjectType) {
     const res = await signIn("credentials", {
       redirect: false,
       ...data,
     });
 
-    // 2. بنتشيك لو فيه Error حقيقي راجع من NextAuth
-    if (res?.error) {
-      console.error("NextAuth Error:", res.error);
-      toast.error("حدث خطأ في تسجيل الدخول: " + res.error);
-      return; // بنوقف الكود هنا مش بنكمل
-    }
-
-    // 3. لو الرد تمام (Ok) ومفيش Error
     if (res?.ok) {
       toast.success("Login successful");
-      
-     
-      const resData = await getCurrentLoggedIn();
-      updateNumberOfCart(resData?.products.length || 0);
+      const res = await getCurrentLoggedIn();
+      updateNumberOfCart(res?.products.length || 0);
 
       setTimeout(() => {
-       
         router.push("/");
-        router.refresh(); 
       }, 1000);
     } else {
       toast.error("Incorrect email or password");
@@ -115,7 +102,6 @@ async function onSubmit(data: LoginObjectType) {
               )}
             />
 
-            {/* Password */}
             {/* Password */}
             <Controller
               name="password"
