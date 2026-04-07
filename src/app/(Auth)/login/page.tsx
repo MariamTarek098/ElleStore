@@ -21,12 +21,14 @@ import { useRouter } from "next/navigation";
 import { loginSchema } from "./login.schema";
 import { signIn } from "next-auth/react";
 import { getCurrentLoggedIn } from "./login.actions";
-import { CartContextType, useCart } from "@/app/_context/cartContext";
+import { CartContextType, useCart, useWishlist, WishlistContextType } from "@/app/_context/cartContext";
+import { getUserWishlist } from "@/app/wishlist/whishlist.services";
 
 export type LoginObjectType = zod.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { updateNumberOfCart } = useCart() as CartContextType;
+  const { updateNumberOfWishlist , setWishlistIds , wishlistIds} = useWishlist() as WishlistContextType;
 
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -42,24 +44,48 @@ export default function LoginPage() {
     },
   });
 
-  async function onSubmit(data: LoginObjectType) {
-    const res = await signIn("credentials", {
-      redirect: false,
-      ...data,
-    });
+async function onSubmit(data: LoginObjectType) {
+  const res = await signIn("credentials", {
+    redirect: false,
+    ...data,
+  });
 
-    if (res?.ok) {
-      toast.success("Login successful");
-      const res = await getCurrentLoggedIn();
-      updateNumberOfCart(res?.products.length || 0);
+  if (res?.ok) {
+    toast.success("Login successful");
 
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
-    } else {
-      toast.error("Incorrect email or password");
+    try {
+      // Fetch data form user who just logged in
+      const [cartData, wishlistData] = await Promise.all([
+        getCurrentLoggedIn(),
+        getUserWishlist()
+      ]);
+
+      // Update Cart Context
+      if (cartData?.products) {
+        updateNumberOfCart(cartData.products.length);
+      }
+
+      // Update Wishlist Context
+      if (wishlistData) {
+        updateNumberOfWishlist(wishlistData.count || 0);
+        
+        // extract IDs into array 
+        const ids = wishlistData.data?.map((prod: any) => prod._id) || [];
+        setWishlistIds(ids);
+      }
+    } catch (error) {
+      console.error("Error fetching user data after login:", error);
     }
+
+    setTimeout(() => {
+      router.push("/");
+      router.refresh(); 
+    }, 1000);
+
+  } else {
+    toast.error("Incorrect email or password");
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-[#50829f]/5">

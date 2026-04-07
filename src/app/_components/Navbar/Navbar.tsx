@@ -35,8 +35,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Package, LogOut, CircleUserRound } from "lucide-react"; // Icons for the menu
-import { signOut } from "next-auth/react"; // For the sign-out action
+import { Package, LogOut, CircleUserRound } from "lucide-react"; 
+import { signOut } from "next-auth/react"; 
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import {
@@ -47,6 +47,9 @@ import {
 } from "@/app/_context/cartContext";
 
 export default function Navbar() {
+
+const { setWishlistIds } = useWishlist();
+
   const session = useSession();
   const username = session.data?.user?.name;
   const isAuth = session.status === "authenticated";
@@ -55,9 +58,11 @@ export default function Navbar() {
   const [categoriesOpen, setCategoriesOpen] = React.useState(false);
   const router = useRouter();
 
-  async function handleLogOut() {
+async function handleLogOut() {
     await signOut({ redirect: false });
     toast.success("You are logged out");
+  
+        setWishlistIds([]);
     router.push("/login");
   }
 
@@ -251,7 +256,7 @@ export default function Navbar() {
                 {/* Sign Out Action */}
                 <DropdownMenuItem
                   className="rounded-lg cursor-pointer py-3 text-red-500 focus:bg-red-50 focus:text-red-600 font-medium"
-                  onClick={() => signOut()}
+                  onClick={handleLogOut}
                 >
                   <LogOut className="mr-3 h-4 w-4" />
                   <span>Sign Out</span>

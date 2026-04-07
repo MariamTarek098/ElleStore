@@ -267,7 +267,6 @@ export default function CheckoutContent({
             <div className="border-t border-slate-100 pt-4 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Subtotal</span>
-
                 <span className=" text-[#50829F] text-l">
                   {cartItems?.totalCartPrice || 0} EGP
                 </span>

@@ -23,15 +23,16 @@ export default function CartContextProvider({ children, res, resp }: {
   resp: WishlistResponse | undefined 
 }) {
 
-  // Cart State
-  const [numberOfCartItems, setNumberOfCartItems] = useState(res ? res.products.length : 0)
+  //  Cart State
+  const [numberOfCartItems, setNumberOfCartItems] = useState(res?.products?.length || 0)
 
-  // Wishlist State
-  const [numberOfWishlistItems, setNumberOfWishlistItems] = useState(resp ? resp.count : 0)
+  //  Wishlist Count State 
+  const [numberOfWishlistItems, setNumberOfWishlistItems] = useState(resp?.count || 0)
   
-// Initialize wishlist IDs from server response to track highlighted wishlist items
+  //  Protect Wishlist IDs 
   const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
-    return resp ? resp.data.map((prod) => prod._id ) : []
+
+    return resp?.data?.map((prod) => prod._id) || []
   })
 
   return (

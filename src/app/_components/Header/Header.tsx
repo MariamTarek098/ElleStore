@@ -7,8 +7,13 @@ import { FaRegUser } from "react-icons/fa6";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { CartContextType, useCart, useWishlist, WishlistContextType } from "@/app/_context/cartContext";
 
 export default function Header() {
+
+      const { updateNumberOfCart } = useCart() as CartContextType;
+      const { updateNumberOfWishlist , setWishlistIds } = useWishlist() as WishlistContextType;
+
   const router = useRouter();
 
   const session = useSession();
@@ -18,6 +23,9 @@ export default function Header() {
   async function handleLogOut() {
     await signOut({ redirect: false });
     toast.success("You are logged out");
+          updateNumberOfCart(0);
+          updateNumberOfWishlist(0);
+           setWishlistIds([]);
     router.push("/login");
   }
 
@@ -75,7 +83,7 @@ export default function Header() {
             {isAuth ? (
               <span
                 onClick={handleLogOut}
-                className="bg-white text-[#50829F] px-4 py-1 rounded-full text-xs font-bold hover:bg-blue-50 transition-colors"
+                className="cursor-pointer bg-white text-[#50829F] px-4 py-1 rounded-full text-xs font-bold hover:bg-blue-50 transition-colors"
               >
                 Sign out
               </span>
