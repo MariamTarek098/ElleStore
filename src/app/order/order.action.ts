@@ -37,7 +37,7 @@ export async function createOnlineOrder(cartId: string , bodyObject: OrderPlaceT
   if (!userToken) {
     throw new Error("Session Ended. Please Login Again");
   }
-  const res = await fetch(`https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartId}?url=http://localhost:3000`, {
+  const res = await fetch(`https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartId}?url=${process.env.NEXTAUTH_URL}`, {
     method: "POST",
     body: JSON.stringify(bodyObject),
     headers: {
